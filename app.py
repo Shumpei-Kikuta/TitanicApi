@@ -19,9 +19,8 @@ MODEL_PATH = "forest.pkl"
 TRAIN = pd.read_csv("data/train.csv")
 
 def transform_json2df(data: dict) -> pd.DataFrame:
-    test_df = pd.DataFrame(columns=COLUMNS)
-    for key_, value_ in data.items():
-        test_df.loc[key_] = value_
+    test_df = pd.DataFrame.from_dict(data)
+    print(test_df)
     return test_df
 
 def load_model(path):
@@ -38,8 +37,10 @@ def transform_df2dict(pred_Y: np.ndarray, passenger_id: np.ndarray):
 @app.route("/predict", methods=["POST"])
 def predict():
     assert(request.method == "POST")
-    test_data = request.data.decode('utf-8')
-    test_data = json.loads(test_data)
+    test_data = request.data
+
+    # jsonのparseでエラーが起きている
+    # test_data = json.loads(test_data)
     test_df = transform_json2df(test_data)
     passenger_id = test_df.PassengerId.values
     assert(test_df.shape[0] == len(test_data))
