@@ -28,6 +28,12 @@ def preprocess_train(train: pd.DataFrame) -> pd.DataFrame:
 
     return train
 
+def check_columns(test, columns):
+    for column in columns:
+        if column not in test.columns:
+            test[column] = 0
+    return test
+
 def preprocess_test(test: pd.DataFrame, train:pd.DataFrame) -> pd.DataFrame:
     # 関係ないカラムを落とす
     test.drop(DROP_COLUMNS, axis=1, inplace=True)
@@ -43,6 +49,9 @@ def preprocess_test(test: pd.DataFrame, train:pd.DataFrame) -> pd.DataFrame:
     test = test.rename(columns={1: "class1", 2: "class2", 3: "class3"})
     test = generate_onehot_encoding(test, "Sex")
     test = generate_onehot_encoding(test, "Embarked")
+
+    necessary_columns = ["class1", "class2", "class3", "female", "male", "S", "C", "Q"]
+    test = check_columns(test, necessary_columns)
 
     return test
 

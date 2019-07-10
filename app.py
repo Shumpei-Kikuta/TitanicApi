@@ -37,21 +37,22 @@ def transform_df2dict(pred_Y: np.ndarray, passenger_id: np.ndarray):
 @app.route("/predict", methods=["POST"])
 def predict():
     assert(request.method == "POST")
-    test_data = request.data
-
-    # jsonのparseでエラーが起きている
-    # test_data = json.loads(test_data)
+    # print(request.headers["Content-Type"])
+    assert(request.headers["Content-Type"] == "application/json")
+    test_data = request.json
+    # print(test_data)
     test_df = transform_json2df(test_data)
     passenger_id = test_df.PassengerId.values
-    assert(test_df.shape[0] == len(test_data))
+    assert(test_df.shape[0] == len(test_data["PassengerId"]))
 
     test_df = preprocess_test(test_df, TRAIN)
     model = load_model(MODEL_PATH)
     pred_Y = model.predict(test_df)
 
     pred_Y_dict = transform_df2dict(pred_Y, passenger_id)
-
+    print(pred_Y_dict)
     return jsonify(pred_Y_dict)
+    # return "OK"
 
 
 if __name__ == '__main__':
