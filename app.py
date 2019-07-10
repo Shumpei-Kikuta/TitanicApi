@@ -30,16 +30,24 @@ def load_model(path):
         model = pickle.load(f)
     return model
 
+def transform_df2dict(pred_Y: np.ndarray, passenger_id: np.ndarray):
+    pred_Y_dict = {}
+    for y, pid in zip(passenger_id, pred_Y):
+        pred_Y_dict[pid] = y
+    return pred_Y_dict
+    
+
 @app.route("/predict", method=["POST"])
 def predict():
     assert(request.method == "POST")
     test_data = request.data.decode('utf-8')
     test_data = json.loads(test_data)
     test_df = transform_json2df(test_data)
+    passenger_id = test_df.PassengerId.values
     assert(test_df.shape[0] == len(test_data))
 
     test_df = preprocess_test(test_df, TRAIN)
-
     model = load_model(MODEL_PATH)
-
     pred_Y = model.predict(test_df)
+
+    pred_Y_dict = transform_df2dict(pred_Y, passenger_id)
