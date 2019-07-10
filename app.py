@@ -9,6 +9,7 @@ from flask import request
 import pandas as pd
 import numpy as np
 import pickle
+from predict import preprocess_test
 
 app = flask.Flask(__name__)
 
@@ -16,10 +17,12 @@ COLUMNS = ["PassengerId", "Pclass", "Name", "Sex", "Age",
            "SibSp", "Parch", "Ticket", "Fare", "Cabin", "Embarked"]
 MODEL_PATH = "forest.pkl"
 
+TRAIN = pd.read_csv("data/train.csv")
+
 def transform_json2df(data: dict) -> pd.DataFrame:
     test_df = pd.DataFrame(columns=COLUMNS)
     for key_, value_ in data.items():
-        test_df.loc(key_) = value_
+        test_df.loc[key_] = value_
     return test_df
 
 def load_model(path):
@@ -35,7 +38,7 @@ def predict():
     test_df = transform_json2df(test_data)
     assert(test_df.shape[0] == len(test_data))
 
-    test_df = preprocess(test_df)
+    test_df = preprocess_test(test_df, TRAIN)
 
     model = load_model(MODEL_PATH)
 
