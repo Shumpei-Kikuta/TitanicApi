@@ -35,6 +35,8 @@ def predict():
     test_df = transform_json2df(test_data)
     assert(test_df.shape[0] == len(test_data))
 
+    test_df = preprocess(test_df)
+
     model = load_model(MODEL_PATH)
 
-
+    pred_Y = model.predict(test_df)
