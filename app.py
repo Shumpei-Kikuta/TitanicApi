@@ -10,6 +10,7 @@ import pandas as pd
 import numpy as np
 import pickle
 from predict import preprocess_test
+from util import *
 
 app = Flask(__name__)
 
@@ -20,7 +21,6 @@ TRAIN = pd.read_csv("data/train.csv")
 
 def transform_json2df(data: dict) -> pd.DataFrame:
     test_df = pd.DataFrame.from_dict(data)
-    print(test_df)
     return test_df
 
 def load_model(path):
@@ -34,13 +34,18 @@ def transform_df2dict(pred_Y: np.ndarray, passenger_id: np.ndarray):
         pred_Y_dict[pid] = y
     return pred_Y_dict
 
+def to_string(array: np.ndarray):
+    list_ = array.tolist()
+    size = len(list_)
+    for i in range(size):
+        list_[i] = str(list_[i])
+    return list_
+
 @app.route("/predict", methods=["POST"])
 def predict():
     assert(request.method == "POST")
-    # print(request.headers["Content-Type"])
     assert(request.headers["Content-Type"] == "application/json")
     test_data = request.json
-    # print(test_data)
     test_df = transform_json2df(test_data)
     passenger_id = test_df.PassengerId.values
     assert(test_df.shape[0] == len(test_data["PassengerId"]))
@@ -49,9 +54,11 @@ def predict():
     model = load_model(MODEL_PATH)
     pred_Y = model.predict(test_df)
 
+    pred_Y = to_string(pred_Y)
+    passenger_id = to_string(passenger_id)
     pred_Y_dict = transform_df2dict(pred_Y, passenger_id)
-    print(pred_Y_dict)
-    return jsonify(pred_Y_dict)
+
+    return json.dumps(stringify_keys(pred_Y_dict))
     # return "OK"
 
 
