@@ -5,13 +5,13 @@ output: {1: 0 or 1, 2:0 or 1, ...}
 """
 import flask 
 import json
-from flask import request
+from flask import request, Flask, jsonify
 import pandas as pd
 import numpy as np
 import pickle
 from predict import preprocess_test
 
-app = flask.Flask(__name__)
+app = Flask(__name__)
 
 COLUMNS = ["PassengerId", "Pclass", "Name", "Sex", "Age", 
            "SibSp", "Parch", "Ticket", "Fare", "Cabin", "Embarked"]
@@ -51,3 +51,5 @@ def predict():
     pred_Y = model.predict(test_df)
 
     pred_Y_dict = transform_df2dict(pred_Y, passenger_id)
+
+    return jsonify(pred_Y_dict)
