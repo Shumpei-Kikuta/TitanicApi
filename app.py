@@ -16,7 +16,6 @@ app = Flask(__name__)
 COLUMNS = ["PassengerId", "Pclass", "Name", "Sex", "Age", 
            "SibSp", "Parch", "Ticket", "Fare", "Cabin", "Embarked"]
 MODEL_PATH = "forest.pkl"
-
 TRAIN = pd.read_csv("data/train.csv")
 
 def transform_json2df(data: dict) -> pd.DataFrame:
@@ -32,12 +31,11 @@ def load_model(path):
 
 def transform_df2dict(pred_Y: np.ndarray, passenger_id: np.ndarray):
     pred_Y_dict = {}
-    for y, pid in zip(passenger_id, pred_Y):
+    for pid, y in zip(passenger_id, pred_Y):
         pred_Y_dict[pid] = y
     return pred_Y_dict
-    
 
-@app.route("/predict", method=["POST"])
+@app.route("/predict", methods=["POST"])
 def predict():
     assert(request.method == "POST")
     test_data = request.data.decode('utf-8')
@@ -53,3 +51,7 @@ def predict():
     pred_Y_dict = transform_df2dict(pred_Y, passenger_id)
 
     return jsonify(pred_Y_dict)
+
+
+if __name__ == '__main__':
+    app.run()
