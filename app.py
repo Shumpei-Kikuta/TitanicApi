@@ -44,6 +44,12 @@ def to_string(array: np.ndarray):
 
 @app.route("/predict", methods=["POST"])
 def predict():
+    response = {"Content-Type": "application/json", "result": None}
+
+    # 不正なinput(カバーしきれていない)
+    if not (request.headers["Content-Type"] == "application/json") and (request.method == "POST"):
+        return flask.jsonify(res="error"), 400
+
     # 受け取ったtestファイルの処理
     test_data = request.json
     test_df = transform_json2df(test_data)
@@ -57,13 +63,13 @@ def predict():
     model = load_model(MODEL_PATH)
     pred_Y = model.predict(test_df)
 
-    # jsonに変換
+    # 出力処理
     pred_Y = to_string(pred_Y)
     passenger_id = to_string(passenger_id)
     pred_Y_dict = transform_df2dict(pred_Y, passenger_id)
-    pred_Y_json = json.dumps(stringify_keys(pred_Y_dict))
+    response["result"] = pred_Y_dict
 
-    return pred_Y_json
+    return jsonify(response)
 
 
 if __name__ == '__main__':
