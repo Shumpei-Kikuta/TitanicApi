@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+import pickle
 
 def generate_onehot_encoding(data: pd.DataFrame, column_name: str, drop=True):
     onehot_repr = pd.get_dummies(data[column_name])
@@ -53,6 +54,11 @@ def main():
     test = pd.read_csv("data/test.csv")
     submission_df = pd.DataFrame({"PassengerId": test.PassengerId, "Survived": test_Y})
     submission_df.to_csv("submission.csv", index=False)
+
+    #save model
+    with open("forest.pkl", mode="wb") as f:
+        pickle.dump(forest, f)
+
     
 
 if __name__ == '__main__':
