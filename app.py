@@ -1,7 +1,8 @@
 """
-jsonでPOST requestを受けとり、予測した結果をjsonにして返す
-input:  {1: [11種の特徴量], 2: [11種の特徴量], ...}
-output: {1: 0 or 1, 2:0 or 1, ...}
+POST requestでjsonファイルを受けとり、予測した結果をjsonにして返す
+ex.
+input:  {{"PassengerId": {"26": 918, "44": 936}, "Pclass": {"26": 1, "44": 1}, ...}
+output: {1: 0, 2: 1, ...}
 """
 import flask 
 import json
@@ -43,23 +44,26 @@ def to_string(array: np.ndarray):
 
 @app.route("/predict", methods=["POST"])
 def predict():
-    assert(request.method == "POST")
-    assert(request.headers["Content-Type"] == "application/json")
+    # 受け取ったtestファイルの処理
     test_data = request.json
     test_df = transform_json2df(test_data)
+
+    # passengerは返す時用に取っておく
     passenger_id = test_df.PassengerId.values
-    assert(test_df.shape[0] == len(test_data["PassengerId"]))
 
     test_df = preprocess_test(test_df, TRAIN)
+
+    # 予測
     model = load_model(MODEL_PATH)
     pred_Y = model.predict(test_df)
 
+    # jsonに変換
     pred_Y = to_string(pred_Y)
     passenger_id = to_string(passenger_id)
     pred_Y_dict = transform_df2dict(pred_Y, passenger_id)
+    pred_Y_json = json.dumps(stringify_keys(pred_Y_dict))
 
-    return json.dumps(stringify_keys(pred_Y_dict))
-    # return "OK"
+    return pred_Y_json
 
 
 if __name__ == '__main__':

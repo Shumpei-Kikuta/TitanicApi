@@ -29,6 +29,7 @@ def preprocess_train(train: pd.DataFrame) -> pd.DataFrame:
     return train
 
 def check_columns(test, columns):
+    """one-hot表現で得られるcolumnの数をtrainと合わせる"""
     for column in columns:
         if column not in test.columns:
             test[column] = 0
@@ -50,12 +51,11 @@ def preprocess_test(test: pd.DataFrame, train:pd.DataFrame) -> pd.DataFrame:
     test = generate_onehot_encoding(test, "Sex")
     test = generate_onehot_encoding(test, "Embarked")
 
+    #testにないカラムがあれば、足しておく
     necessary_columns = ["class1", "class2", "class3", "female", "male", "S", "C", "Q"]
     test = check_columns(test, necessary_columns)
 
     return test
-
-
 
 def main():
     # データ読み込み
@@ -66,14 +66,14 @@ def main():
     train = preprocess_train(train)
     test = preprocess_test(test, train)
 
-    # modeling 
+    #　変数の設定
     train_X = train.drop("Survived", axis=1)
     train_Y = train.Survived
     test_X = test
 
+    # modeling 
     forest = RandomForestClassifier(n_estimators=100)
     forest.fit(train_X, train_Y)
-
     test_Y = forest.predict(test_X)
 
     # submission
