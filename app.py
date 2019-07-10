@@ -13,8 +13,8 @@ import pickle
 from predict import preprocess_test
 from util import *
 
-app = Flask(__name__)
 
+app = Flask(__name__)
 COLUMNS = ["PassengerId", "Pclass", "Name", "Sex", "Age", 
            "SibSp", "Parch", "Ticket", "Fare", "Cabin", "Embarked"]
 MODEL_PATH = "forest.pkl"
